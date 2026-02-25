@@ -3,6 +3,9 @@
 Author: Lead SRE  
 Objective: Zero downtime financial-grade infrastructure  
 
+<img width="1217" height="871" alt="image" src="https://github.com/user-attachments/assets/ebcae9dd-f4d2-4229-b74d-b8ecf0f20cd5" />
+
+
 ---
 
 # 1. Business Context
