@@ -34,7 +34,7 @@ We use an Amazon S3 bucket as our secure, remote vault for this state.
 
 ### Key Features
 
--   Region locking (e.g., AP-Southeast-2)
+-   Region locking (e.g., AP-Southeast-1)
 -   Account ID restriction
 -   Force destroy for demo cleanup
 -   allowed_account_ids safety mechanism
