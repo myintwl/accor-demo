@@ -3,6 +3,17 @@
 Author: Lead SRE  
 Objective: Zero downtime financial-grade infrastructure  
 
+# Architecture Summary
+
+This design ensures:
+
+- Zero downtime
+- Flash sale readiness
+- Financial integrity
+- Secure data handling
+- Enterprise-grade reliability
+- Minimal operational toil
+
 <img width="1217" height="871" alt="image" src="https://github.com/user-attachments/assets/ebcae9dd-f4d2-4229-b74d-b8ecf0f20cd5" />
 
 
@@ -53,9 +64,18 @@ Flash Sale Handling:
 - SQS fallback queue
 
 ---
+# 4. Operation Model
+Day 2 Strategy:
+- Everything as Code
+- CI/CD enforced
+- Drift detection
+- Chaos testing
+- Load test before flash sale
+- Backup validation quarterly
 
-# 4. Data Layer
-
+---
+# 5. Data Layer
+Day 2 Strategy:Cont
 ## RDS
 
 - Multi-AZ
@@ -75,64 +95,8 @@ Purpose:
 - Burst absorption
 
 ---
-
-# 5. Security Architecture
-
-- Private subnets for workloads
-- Isolated subnets for DB
-- IRSA for pod identity
-- No public DB access
-- WAF managed rule sets
-- Encryption everywhere
-
-Defense in depth applied at:
-
-- Network
-- IAM
-- Application
-- Infrastructure
-- Observability
-
----
-
-# 6. Scalability Strategy
-
-Application Scaling:
-- HPA (CPU + custom metrics)
-- Scale to 10x baseline
-
-Infrastructure Scaling:
-- Karpenter dynamic provisioning
-- Spot + On-Demand mix
-- Pre-warmed capacity
-
-Database Strategy:
-- Read replicas if needed
-- Consider Aurora for faster failover
-
----
-
-# 7. Reliability Strategy
-
-Failure Scenarios Covered:
-
-AZ Failure:
-- Multi-AZ cluster
-- Automatic pod redistribution
-- RDS failover
-
-Node Failure:
-- Kubernetes rescheduling
-
-Bad Deployment:
-- GitOps
-- Canary rollout
-- Automatic rollback
-
----
-
-# 8. Observability Model
-
+# 6. Observability Model
+Day 2 Strategy:Cont
 Golden Signals:
 
 - Latency
@@ -155,36 +119,12 @@ Alerting:
 
 ---
 
-# 9. Operational Model
+# 7. Future Enhancements
+Day 2 Strategy:Cont
 
-Day 2 Strategy:
-
-- Everything as Code
-- CI/CD enforced
-- Drift detection
-- Chaos testing
-- Load test before flash sale
-- Backup validation quarterly
-
----
-
-# 10. Future Enhancements
-
-- Multi-region active-active
+- Multi-region active-active or active-passive 
 - Aurora Global DB
 - Service Mesh with mTLS
 - Automated game days
 - Cost optimization layer
 
----
-
-# Architecture Summary
-
-This design ensures:
-
-- Zero downtime
-- Flash sale readiness
-- Financial integrity
-- Secure data handling
-- Enterprise-grade reliability
-- Minimal operational toil
