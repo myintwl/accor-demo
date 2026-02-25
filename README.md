@@ -127,4 +127,13 @@ Day 2 Strategy:Cont
 - Service Mesh with mTLS
 - Automated game days
 - Cost optimization layer
+- DR to multicloud 
 
+                ┌──────────────────────────┐
+                │        Route 53          │
+                │  Health Check + Failover │
+                └─────────────┬────────────┘
+                              │
+              ┌───────────────┴────────────────┐
+              │                                │
+        Primary (AWS)                    DR (Azure)
