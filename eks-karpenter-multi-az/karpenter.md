@@ -104,13 +104,22 @@ aws eks update-kubeconfig –region AP-Southeast-2 –name Carpenter
 
 ### Observe
 
-kubectl get pods -n kube-system kubectl get sa -n kube-system \| grep
-carpenter
+# Check all running pods in the system namespace
+kubectl get pods -n kube-system
 
-### Scale Demo
+# Verify the Service Account was created correctly
+kubectl get sa -n kube-system | grep carpenter
+The Scaling Demo
+Trigger a scale-up using the "Inflate" deployment:
+# Scale the application up to 5 replicas
+kubectl scale deployment inflate --replicas=5
 
-kubectl scale deployment inflate –replicas=5 kubectl get pods -w kubectl
-delete deployment inflate
+# Watch the pods and see Karpenter provision new hardware
+kubectl get pods -w
+
+# Cleanup the demo deployment
+kubectl delete deployment inflate
+
 
 ------------------------------------------------------------------------
 
