@@ -1,6 +1,7 @@
 ###############################################################################
 # Provider
 ###############################################################################
+
 provider "aws" {
     region              = var.region
     allowed_account_ids = [var.aws_account_id]
@@ -68,6 +69,7 @@ data "aws_ecrpublic_authorization_token" "token" {
 ###############################################################################
 # VPC
 ###############################################################################
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.13.0"
@@ -174,6 +176,7 @@ module "karpenter" {
 ###############################################################################
 # Karpenter Helm
 ###############################################################################
+
 resource "helm_release" "karpenter" {
   namespace           = "kube-system"
   name                = "karpenter"
@@ -199,6 +202,7 @@ resource "helm_release" "karpenter" {
 ###############################################################################
 # Karpenter Kubectl
 ###############################################################################
+
 resource "kubectl_manifest" "karpenter_node_pool" {
   yaml_body = <<-YAML
     apiVersion: karpenter.sh/v1beta1
@@ -262,6 +266,7 @@ resource "kubectl_manifest" "karpenter_node_class" {
 ###############################################################################
 # Inflate deployment
 ###############################################################################
+
 resource "kubectl_manifest" "karpenter_example_deployment" {
   yaml_body = <<-YAML
     apiVersion: apps/v1
