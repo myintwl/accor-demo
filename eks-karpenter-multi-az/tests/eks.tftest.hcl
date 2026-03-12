@@ -32,27 +32,58 @@ run "eks_addons_configured" {
   }
 }
 
+run "eks_kubernetes_version" {
+  command = plan
+
+  assert {
+    condition     = module.eks.cluster_version == "1.30"
+    error_message = "EKS cluster must run Kubernetes 1.30"
+  }
+}
+
+# Workers run on private subnets — verify 3 private subnets (one per AZ) exist
+# and carry the karpenter.sh/discovery tag so Karpenter can schedule onto them.
 run "eks_uses_private_subnets_for_workers" {
   command = plan
 
   assert {
-    condition     = module.eks.node_groups["karpenter"] != null
-    error_message = "Karpenter node group must exist"
+    condition     = length(module.vpc.private_subnets) == 3
+    error_message = "Must have 3 private subnets (one per AZ) for worker nodes"
+  }
+
+  assert {
+    condition     = module.vpc.private_subnet_tags["karpenter.sh/discovery"] == var.cluster_name
+    error_message = "Private subnets (used for workers) must carry the karpenter.sh/discovery tag"
   }
 }
 
-run "eks_node_group_instance_type" {
+# The EKS control plane is isolated in intra subnets (no IGW, no NAT).
+# Verify 3 intra subnets exist and are distinct from the private/public tiers.
+run "eks_control_plane_uses_intra_subnets" {
   command = plan
 
   assert {
-    condition = contains(
-      module.eks.eks_managed_node_groups["karpenter"].node_group_resources[0].autoscaling_groups[0].name != "",
-      true
-    )
-    error_message = "Karpenter managed node group autoscaling group must be planned"
+    condition     = length(module.vpc.intra_subnets) == 3
+    error_message = "Must have 3 intra subnets — one per AZ — dedicated to the EKS control plane"
+  }
+
+  assert {
+    condition     = toset(module.vpc.intra_subnets) != toset(module.vpc.private_subnets)
+    error_message = "Intra subnets (control plane) must be different from private subnets (workers)"
   }
 }
 
+run "eks_node_group_exists" {
+  command = plan
+
+  assert {
+    condition     = contains(keys(module.eks.eks_managed_node_groups), "karpenter")
+    error_message = "A managed node group named 'karpenter' must be declared"
+  }
+}
+
+# The node group runs m5.large nodes. Scaling: min=2 keeps two nodes always
+# available for EKS add-ons and Karpenter itself; max=10 caps the baseline pool.
 run "eks_node_group_scaling_config" {
   command = plan
 
@@ -80,11 +111,17 @@ run "eks_creator_admin_permissions_enabled" {
   }
 }
 
-run "eks_control_plane_uses_intra_subnets" {
+# The 'karpenter' node group carries CriticalAddonsOnly=true:NoSchedule so that
+# only EKS add-ons and Karpenter itself run on these baseline nodes; all other
+# workloads are forced onto Karpenter-provisioned nodes.
+run "eks_node_group_critical_addons_taint" {
   command = plan
 
   assert {
-    condition     = length(module.eks.cluster_primary_security_group_id) > 0
-    error_message = "EKS cluster primary security group must be set"
+    condition = contains(
+      keys(module.eks.eks_managed_node_groups["karpenter"].node_group_taints),
+      "CriticalAddonsOnly"
+    )
+    error_message = "The 'karpenter' node group must carry the CriticalAddonsOnly taint to isolate system workloads"
   }
 }

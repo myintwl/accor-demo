@@ -96,3 +96,47 @@ run "alternate_region" {
     error_message = "Changing region must update the VPC AZs"
   }
 }
+
+###############################################################################
+# Negative Tests — invalid inputs must be rejected by validation rules
+###############################################################################
+
+run "invalid_aws_account_id_rejected" {
+  command = plan
+
+  variables {
+    aws_account_id = "not-an-account"
+  }
+
+  expect_failures = [var.aws_account_id]
+}
+
+run "short_aws_account_id_rejected" {
+  command = plan
+
+  variables {
+    aws_account_id = "12345"
+  }
+
+  expect_failures = [var.aws_account_id]
+}
+
+run "invalid_region_rejected" {
+  command = plan
+
+  variables {
+    region = "invalid-region"
+  }
+
+  expect_failures = [var.region]
+}
+
+run "cluster_name_starting_with_digit_rejected" {
+  command = plan
+
+  variables {
+    cluster_name = "1invalid-name"
+  }
+
+  expect_failures = [var.cluster_name]
+}

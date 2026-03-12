@@ -182,6 +182,11 @@ resource "helm_release" "karpenter" {
   repository_password = data.aws_ecrpublic_authorization_token.token.password
   chart               = "karpenter"
   version             = "1.0.0"
+  # wait = false avoids Helm waiting for Karpenter pods to become Ready before
+  # Terraform proceeds. This is intentional: the kubectl_manifest resources that
+  # create the EC2NodeClass and NodePool CRDs depend on the Helm release, not on
+  # Karpenter being fully running. Waiting would cause a deadlock because
+  # Karpenter itself needs nodes (which it can only provision once its CRDs exist).
   wait                = false
 
   values = [
