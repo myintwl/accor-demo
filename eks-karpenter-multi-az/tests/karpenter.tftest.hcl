@@ -105,6 +105,25 @@ run "karpenter_node_pool_nitro_hypervisor" {
   }
 }
 
+run "karpenter_node_pool_instance_generation" {
+  command = plan
+
+  # Restricts Karpenter to instance generations newer than 2, ensuring modern
+  # hardware with improved performance and cost characteristics.
+  assert {
+    condition = can(regex(
+      "karpenter\\.k8s\\.aws/instance-generation",
+      kubectl_manifest.karpenter_node_pool.yaml_body
+    ))
+    error_message = "NodePool must constrain instance-generation (require generation > 2)"
+  }
+
+  assert {
+    condition     = can(regex("operator: Gt", kubectl_manifest.karpenter_node_pool.yaml_body))
+    error_message = "NodePool instance-generation constraint must use Gt (greater-than) operator"
+  }
+}
+
 run "karpenter_node_pool_consolidation_policy" {
   command = plan
 
@@ -144,6 +163,28 @@ run "karpenter_node_class_subnet_selector" {
       kubectl_manifest.karpenter_node_class.yaml_body
     ))
     error_message = "EC2NodeClass subnet selector must use karpenter.sh/discovery tag matching cluster name"
+  }
+}
+
+run "karpenter_node_class_security_group_selector" {
+  command = plan
+
+  # EC2NodeClass must discover security groups via the same karpenter.sh/discovery
+  # tag used for subnets, ensuring nodes are placed in the correct security group.
+  assert {
+    condition = can(regex(
+      "securityGroupSelectorTerms",
+      kubectl_manifest.karpenter_node_class.yaml_body
+    ))
+    error_message = "EC2NodeClass must define securityGroupSelectorTerms"
+  }
+
+  assert {
+    condition = can(regex(
+      "karpenter.sh/discovery: ${var.cluster_name}",
+      kubectl_manifest.karpenter_node_class.yaml_body
+    ))
+    error_message = "EC2NodeClass security group selector must use karpenter.sh/discovery tag matching cluster name"
   }
 }
 
